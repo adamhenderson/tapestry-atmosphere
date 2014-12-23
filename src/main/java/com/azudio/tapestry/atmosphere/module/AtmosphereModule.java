@@ -115,22 +115,18 @@ public class AtmosphereModule {
 
 		AtmosphereFramework f = new AtmosphereFramework(new ServletConfig() {
 
-			@Override
 			public String getServletName() {
 				return "atmosphere";
 			}
 
-			@Override
 			public ServletContext getServletContext() {
 				return applicationGlobals.getServletContext();
 			}
 
-			@Override
 			public Enumeration<String> getInitParameterNames() {
 				return applicationGlobals.getServletContext().getInitParameterNames();
 			}
 
-			@Override
 			public String getInitParameter(String name) {
 				return applicationGlobals.getServletContext().getInitParameter(name);
 			}
