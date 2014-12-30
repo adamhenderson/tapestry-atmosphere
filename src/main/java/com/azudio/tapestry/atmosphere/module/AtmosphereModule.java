@@ -17,7 +17,6 @@ import org.apache.tapestry5.ioc.ServiceBinder;
 import org.apache.tapestry5.ioc.annotations.Contribute;
 import org.apache.tapestry5.ioc.annotations.EagerLoad;
 import org.apache.tapestry5.ioc.annotations.Inject;
-import org.apache.tapestry5.ioc.annotations.InjectService;
 import org.apache.tapestry5.services.ApplicationGlobals;
 import org.apache.tapestry5.services.RequestFilter;
 import org.apache.tapestry5.services.RequestHandler;
@@ -33,12 +32,21 @@ import org.atmosphere.interceptor.SuspendTrackerInterceptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.azudio.tapestry.atmosphere.handlers.TapHandler1;
+import com.azudio.tapestry.atmosphere.TapestryAtmosphereSymbols;
 import com.azudio.tapestry.atmosphere.services.AtmosphereRequestFilter;
 
 public class AtmosphereModule {
 
 	private static final Logger log = LoggerFactory.getLogger(AtmosphereModule.class);
+
+	/**
+	 * Contribute to the Application Defaults
+	 * 
+	 * @param configuration
+	 */
+	public static void contributeFactoryDefaults(MappedConfiguration<String, Object> configuration) {
+		configuration.add(TapestryAtmosphereSymbols.PUSH_PREFIX, "/push");
+	}
 
 	/**
 	 * Contribute to the Application Defaults
@@ -56,17 +64,19 @@ public class AtmosphereModule {
 	 */
 	public static void bind(ServiceBinder binder) {
 		binder.bind(RequestFilter.class, AtmosphereRequestFilter.class).withId("Atmosphere");
-		binder.bind(AtmosphereHandler.class, TapHandler1.class).withId("TapestryAtmosphereHandlerExample1");
 	}
 
 	@EagerLoad
-	public static AtmosphereFramework buildAtmosphereFramework(final ApplicationGlobals applicationGlobals, @InjectService("TapestryAtmosphereHandlerExample1") AtmosphereHandler tapHandler1) {
+	public static AtmosphereFramework buildAtmosphereFramework(final ApplicationGlobals applicationGlobals) {
+
+		String tapestryPackage = applicationGlobals.getServletContext().getInitParameter("tapestry.app-package");
 
 		log.debug("Building AtmosphereFramework");
 
 		try {
 			AtmosphereFramework f;
-			if ("----".equals("initialiseUsingServletConfig")) {
+
+			if ("xinitialiseUsingServletConfig".equals("initialiseUsingServletConfig")) {
 				log.debug("Initialising Atmposhere using ServletConfig");
 				f = initialiseUsingServletConfig(applicationGlobals);
 			} else {
@@ -74,8 +84,10 @@ public class AtmosphereModule {
 
 				f = new AtmosphereFramework(false, false);
 				f.setBroadcasterCacheClassName("org.atmosphere.cache.DefaultBroadcasterCache");
-
-				f.init();
+				f.setUseNativeImplementation(true);
+				f.setUseBlockingImplementation(false);
+				f.addInitParameter("org.atmosphere.useWebSocketAndServlet3", "true");
+				f.addInitParameter("org.atmosphere.cpr.packages", tapestryPackage + ".handlers");
 
 				List<AtmosphereInterceptor> list = new ArrayList<AtmosphereInterceptor>();
 				list.add(new AtmosphereResourceLifecycleInterceptor());
@@ -83,12 +95,19 @@ public class AtmosphereModule {
 				list.add(new SuspendTrackerInterceptor());
 				list.add(new BroadcastOnPostAtmosphereInterceptor());
 
-				f.addAtmosphereHandler("/tapestryatmospherehandlerexample1", tapHandler1, list);
+				// This would come from a contribution and not be hard coded like this...
+				// f.addAtmosphereHandler("/push/tapestryatmospherehandlerexample1", tapHandler1, list);
+				// f.setHandlersPath("");
+				// f.addAtmosphereHandler("/push/chat", new TapestryManagedServiceHander1(), list);
+				// f.getAtmosphereConfig().handlers().keySet();
+				// log.debug("Added Tap1Handler");
 
-				log.debug("Added Tap1Handler");
+				f.init();
+
 			}
 
-			// This is a dummy handler for all tapestry page & component requests so a atmoshpereframework can be attached to the request
+			// This is a no-op handler for all tapestry page & component requests so a atmosphereframework can be attached to the request
+			log.debug("Adding /* handler to allow requests down into Tapestry");
 			f.addAtmosphereHandler("/*", new AtmosphereHandler() {
 
 				public void onStateChange(AtmosphereResourceEvent event) throws IOException {

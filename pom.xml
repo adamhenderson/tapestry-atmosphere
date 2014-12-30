@@ -2,17 +2,19 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.azudio</groupId>
 	<artifactId>tapestry-atmosphere</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<description>Atmosphere Support for Tapestry 5</description>
 	<dependencies>
 		<!-- TAPESTRY -->
 		<dependency>
+			<scope>compile</scope>
 			<groupId>org.apache.tapestry</groupId>
 			<artifactId>tapestry-core</artifactId>
 			<version>${tapestry-release-version}</version>
 		</dependency>
 		<!--  LOGGING -->
 		<dependency>
+			<scope>compile</scope>
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.7</version>
