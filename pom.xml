@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.azudio</groupId>
 	<artifactId>tapestry-atmosphere</artifactId>
-	<version>0.0.3-SNAPSHOT</version>
+	<version>0.0.4-SNAPSHOT</version>
 	<description>Atmosphere Support for Tapestry 5</description>
 	<dependencies>
 		<!-- TAPESTRY -->
